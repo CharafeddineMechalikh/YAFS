@@ -152,21 +152,6 @@ class Application:
 
         self.data = data
 
-        # self.modules_sink = modules
-    # def set_module(self, modules, type_module):
-    #     """
-    #     Pure source or sink modules must be typified
-    #
-    #     Args:
-    #         modules (list): a list of modules names
-    #         type_module (str): TYPE_SOURCE or TYPE_SINK
-    #     """
-    #     if type_module == self.TYPE_SOURCE:
-    #         self.modules_src = modules
-    #     elif type_module == self.TYPE_SINK:
-    #         self.modules_sink = modules
-    #     elif type_module == self.TYPE_MODULE:
-    #         self.modules_pure = modules
 
     def get_pure_modules(self):
         """

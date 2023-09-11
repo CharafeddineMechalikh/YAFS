@@ -134,16 +134,7 @@ class ClusterPlacement(Placement):
                 idDES = sim.deploy_module(app_name,module, services[module],id_mobiles)
 
     #end function
-
-    # def run(self, sim):
-    #     """
-    #     This method will be invoked during the simulation to change the assignment of the modules to the topology
-    #
-    #     Args:
-    #         sim (:mod: yafs.core.Sim)
-    #     """
-    #     self.logger.debug("Activiting - Cluster Algorithm (do nothing)")
-
+ 
 
 class EdgePlacement(Placement):
     """

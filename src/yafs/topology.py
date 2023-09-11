@@ -16,8 +16,7 @@ class Topology:
 
     LINK_PR = "PR"
     "Link feauture:  Propagation delay"
-
-    # LINK_LATENCY = "LATENCY"
+ 
     # " A edge or a network link has a Bandwidth"
 
     NODE_IPT = "IPT"
@@ -120,8 +119,7 @@ class Topology:
         for edge in data["link"]:
             self.G.add_edge(edge["s"], edge["d"], BW=edge[self.LINK_BW],PR=edge[self.LINK_PR])
 
-
-        #TODO This part can be removed in next versions
+ 
         for node in data["entity"]:
             self.nodeAttributes[node["id"]] = node
         #end remove
@@ -134,15 +132,10 @@ class Topology:
             try:
                 valuesIPT[node["id"]] = node["IPT"]
             except KeyError:
-                valuesIPT[node["id"]] = 0
-            # try:
-            #     valuesRAM[node["id"]] = node["RAM"]
-            # except KeyError:
-            #     valuesRAM[node["id"]] = 0
+                valuesIPT[node["id"]] = 0 
 
 
-        nx.set_node_attributes(self.G,values=valuesIPT,name="IPT")
-        # nx.set_node_attributes(self.G,values=valuesRAM,name="RAM")
+        nx.set_node_attributes(self.G,values=valuesIPT,name="IPT") 
 
         self.__init_uptimes()
 

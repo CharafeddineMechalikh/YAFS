@@ -177,7 +177,6 @@ class Sim:
         Kwargs:
             id_src (int) identifier of a pure source module
         """
-        #TODO IMPROVE asignation of topo = alloc_DES(IdDES) , It has to move to the get_path process
         try:
             paths,DES_dst = self.selector_path[app_name].get_path(self,app_name, message, self.alloc_DES[idDES], self.alloc_DES, self.alloc_module, self.last_busy_time,from_des=idDES)
 
@@ -187,8 +186,6 @@ class Sim:
 
                 if self.logger.isEnabledFor(logging.DEBUG):
                     self.logger.debug("From __send_message function: ")
-                    # self.print_debug_assignaments()
-                    # print "NODES (%i): %s"%(len(self.topology.G.nodes()),self.topology.G.nodes())
                     self.logger.debug("NODES (%i)" % len(self.topology.G.nodes()))
 
                     if self.control_movement_class is not None:
@@ -198,7 +195,7 @@ class Sim:
 
                 self.logger.debug("(#DES:%i)\t--- SENDING Message:\t%s: PATH:%s  DES:%s" % (idDES, message.name,paths,DES_dst))
 
-                # print "MESSAGES"
+                
                 #May be, the selector of path decides broadcasting multiples paths
                 for idx,path in enumerate(paths):
                     msg = copy.copy(message)
@@ -223,12 +220,6 @@ class Sim:
         while not self.stop:
             message = yield self.network_ctrl_pipe.get()
 
-            # print "NetworkProcess --- Current time %d " %self.env.now
-            # print "name " + message.name
-            # print "Path:",message.path
-            # print "DST_INT:",message.dst_int
-            # #print message.timestamp
-            # print "DST",message.dst
 
 
             # If same SRC and PATH or the message has achieved the penultimate node to reach the dst
@@ -241,7 +232,6 @@ class Sim:
                 self.consumer_pipes[pipe_id].put(message)
             else:
                 # The message is sent at first time or it sent more times.
-                # if message.dst_int < 0:
 
                 if (isinstance(message.dst_int , str) and len(message.dst_int ) == 0) or \
                         (isinstance(message.dst_int , int) and message.dst_int  < 0):
@@ -259,22 +249,16 @@ class Sim:
                     last_used = self.last_busy_time[link]
                 except KeyError:
                     last_used = 0.0
-                    # self.last_busy_time[link] = last_used
-
-                    #link = (message.dst_int, src_int)
-                    #last_used = self.last_busy_time[link]
+                  
                 """
                 Computing message latency
                 """
                 size_bits = message.bytes
-                #size_bits = message.bytes * 8
                 try:
-                   # transmit = size_bits / (self.topology.get_edge(link)[Topology.LINK_BW] * 1000000.0)  # MBITS!
                     transmit = size_bits / (self.topology.get_edge(link)[Topology.LINK_BW] * 1000000.0)  # MBITS!
                     propagation = self.topology.get_edge(link)[Topology.LINK_PR]
                     latency_msg_link = transmit + propagation
 
-                    #print "-link: %s -- lat: %d" %(link,latency_msg_link)
 
                     # update link metrics
                     self.metrics.insert_link(
@@ -288,8 +272,7 @@ class Sim:
                         shift_time = last_used - self.env.now
                         last_used = self.env.now + shift_time + latency_msg_link
 
-                    # print "Send next WakeUp : ", last_used
-                    # print "-" * 30
+                  
 
                     self.last_busy_time[link] = last_used
                     self.env.process(self.__wait_message(message, latency_msg_link, shift_time))
@@ -309,7 +292,7 @@ class Sim:
                         message.path = copy.copy(paths[0])
                         message.idDES = DES_dst[0]
                         self.logger.debug("(\t New path given. Message is enrouting again.")
-                        # print "\t",msg.path
+                        
                         self.network_ctrl_pipe.put(message)
 
 
@@ -414,7 +397,6 @@ class Sim:
                 """
                 id_node = self.alloc_DES[des]
 
-                # att_node = self.topology.get_nodes_att()[id_node] # WARNING DEPRECATED from V1.0
                 att_node = self.topology.G.nodes[id_node]
 
                 time_service = message.inst / float(att_node["IPT"])
@@ -423,35 +405,7 @@ class Sim:
             """
             it records the entity.id who sends this message
             """
-            # if not message.path:
-            #     from_id_source = id_node  # same src like dst
-            # else:
-            #     from_id_source = message.path[0]
-            #
-
-            # print("-"*50)
-            # print("Module: ",module) # module that receives the request (RtR)
-            # print("DES ",des) # DES process who RtR
-            # print("ID MODULE: ",id_node)  #Topology entity who RtR
-            # print("Message.name ",message.name) # Message name
-            # print("Message.id ", message.id) #Message generator id
-            # print("Message.path ",message.path) #enrouting path
-            # print("Message src ",message.src) #module source who send the request
-            # print("Message dst ",message.dst) #module dst (the entity that RtR)
-            # print("Message idDEs ",message.idDES) #DES intermediate process that process the request
-            # print("TOPO.src ", message.path[0]) #entity that RtR
-            # print("TOPO.dst ", int(self.alloc_DES[des])) #DES process that RtR
-            # print("time service ",time_service)
-            # print("original_DES_src ",message.original_DES_src) #when a message comes from a SRC.pure (user)
-
-
-
-            # # print "MODULE: ",self.alloc_module[app][module]
-            # # tmp = []
-            # # for it in self.alloc_module[app][module]:
-            # #     tmp.append(self.alloc_DES[it])
-            # # print "ALLOC:  ", tmp
-            # # print "PATH 0: " ,message.path[0]
+           
 
 
             sourceDES = -1
@@ -459,7 +413,7 @@ class Sim:
                 # WARNING.
                 # ONLY IN THIS CASE (Try)
                 # If there are more than two equal modules deployed in the same entity, it will not be possible to determine which process sent this package at this point. That information will have to be calculated by the trace of the message (message.id)
-                #TODO fix this problem
+               
                 DES_possible = self.alloc_module[app][message.src]
                 for eDES in DES_possible:
                     if self.alloc_DES[eDES] == message.path[0]:
@@ -468,8 +422,6 @@ class Sim:
                 #The message comes from a SRC.entity (an user)
                 sourceDES = message.original_DES_src
 
-            # print "Source DES ",sourceDES
-            # print "-" * 50
 
             self.metrics.insert(
                 {"id":message.id,"type": type, "app": app, "module": module, "message": message.name,
@@ -489,11 +441,6 @@ class Sim:
             return 1
 
 
-        # self.logger.debug("TS[%s] - DES: %i - %d"%(module,des,time_service))
-        # except:
-        #     self.logger.warning("This module has been removed previously to the arrival time of this message. DES: %i"%des)
-        #     return 0
-
     """
     MEJORAR - ASOCIAR UN PROCESO QUE LOS CONTROLES®.
     """
@@ -502,7 +449,6 @@ class Sim:
         myId = self.__get_id_process()
         self.logger.debug("Added_Process - UP entity Creation\t#DES:%i" % myId)
         while not self.stop:
-            # TODO Define function to ADD a new NODE in topology
             yield self.env.timeout(next_event(**param))
             self.logger.debug("(DES:%i) %7.4f Node " % (myId, self.env.now))
         self.logger.debug("STOP_Process - UP entity Creation\t#DES%i" % myId)
@@ -552,14 +498,6 @@ class Sim:
 
                 m = self.apps[app_name].services[module]
 
-                # for ser in m:
-                #     if "message_in" in ser.keys():
-                #         try:
-                #             print "\t\t M_In: %s  -> M_Out: %s " % (ser["message_in"].name, ser["message_out"].name)
-                #         except:
-                #             print "\t\t M_In: %s  -> M_Out: [NOTHING] " % (ser["message_in"].name)
-
-                # print "Registers len: %i" %len(register_consumer_msg)
                 doBefore = False
                 for register in register_consumer_msg:
                     if msg.name == register["message_in"].name:
@@ -567,18 +505,7 @@ class Sim:
                         """
                         Processing the message
                         """
-                        # if ides == 3:
-                        #     print "Consumer Message: %d " % self.env.now
-                        #     print "MODULE DES: ",ides
-                        #     print "id ",msg.id
-                        #     print "name ",msg.name
-                        #     print msg.path
-                        #     print msg.dst_int
-                        #     print msg.timestamp
-                        #     print msg.dst
-                        #
-                        #     print "-" * 30
-
+                      
                         #The module only computes this type of message one time.
                         #It records once
                         if not doBefore:
@@ -662,7 +589,6 @@ class Sim:
         myId = self.__get_id_process()
         self.logger.debug("Added_Process - Internal Monitor: %s\t#DES:%i" % (name,myId))
         if show_progress_monitor:
-            # self.pbar = tqdm(total=self.until)
             pass
         while not self.stop:
             yield self.env.timeout(distribution.next())
@@ -971,12 +897,10 @@ class Sim:
 
         for id_des_process in self.alloc_source:
             src_deployed = self.alloc_source[id_des_process]
-            # print "Module (SRC): %s(%s) - deployed at entity.id: %s" %(src_deployed["module"],src_deployed["app"],src_deployed["id"])
             alloc_entities[src_deployed["id"]].append(str(src_deployed["app"])+"#"+src_deployed["module"])
 
         for app in self.alloc_module:
             for module in self.alloc_module[app]:
-                # print "Module (MOD): %s(%s) - deployed at entities.id: %s" % (module,app,self.alloc_module[app][module])
                 for idDES in self.alloc_module[app][module]:
                     alloc_entities[self.alloc_DES[idDES]].append(str(app)+"#"+str(module))
 
@@ -1154,12 +1078,6 @@ class Sim:
         time_shift = 200
         distribution = deterministic_distribution(name="SIM_Deterministic", time=time_shift)
         self.env.process(self.__add_stop_monitor("Stop_Control_Monitor",self.__ctrl_progress_monitor,distribution,show_progress_monitor,time_shift=time_shift))
-
-        # if mobile_behaviour:
-        #     """
-        #     Updating control variables of mobile environment
-        #     """
-        #     self.update_service_coverage()
 
 
         self.print_debug_assignaments()

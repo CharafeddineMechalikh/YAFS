@@ -19,8 +19,7 @@ class DeviceSpeedAwareRouting(Selection):
             bestLong = float('inf')
             minPath = []
             bestDES = []
-            moreDES = []
-            #print len(DES_dst)
+            moreDES = [] 
             for dev in DES_dst:
                 node_dst = alloc_DES[dev]
                 path = list(nx.shortest_path(sim.topology.G, source=node_src, target=node_dst))
@@ -56,7 +55,6 @@ class DeviceSpeedAwareRouting(Selection):
 
         except (nx.NetworkXNoPath, nx.NodeNotFound) as e:
             self.logger.warning("There is no path between two nodes: %s - %s " % (node_src, node_dst))
-            # print("Simulation must ends?)"
             return [], None
 
     def get_path(self, sim, app_name, message, topology_src, alloc_DES, alloc_module, traffic, from_des):
@@ -84,28 +82,20 @@ class DeviceSpeedAwareRouting(Selection):
 
     def get_path_from_failure(self, sim, message, link, alloc_DES, alloc_module, traffic, ctime, from_des):
 
-        idx = message.path.index(link[0])
-        #print "IDX: ",idx
+        idx = message.path.index(link[0]) 
         if idx == len(message.path):
             # The node who serves ... not possible case
             return [],[]
         else:
-            node_src = message.path[idx] #In this point to the other entity the system fail
-            # print "SRC: ",node_src # 164
+            node_src = message.path[idx] #In this point to the other entity the system fail 
 
-            node_dst = message.path[len(message.path)-1]
-            # print "DST: ",node_dst #261
-            # print "INT: ",message.dst_int #301
+            node_dst = message.path[len(message.path)-1] 
 
             path, des = self.get_path(sim,message.app_name,message,node_src,alloc_DES,alloc_module,traffic,from_des)
-            if len(path[0])>0:
-                # print path # [[164, 130, 380, 110, 216]]
-                # print des # [40]
+            if len(path[0])>0: 
 
-                concPath = message.path[0:message.path.index(path[0][0])] + path[0]
-                # print concPath # [86, 242, 160, 164, 130, 380, 110, 216]
-                newINT = node_src #path[0][2]
-                # print newINT # 380
+                concPath = message.path[0:message.path.index(path[0][0])] + path[0] 
+                newINT = node_src #path[0][2] 
 
                 message.dst_int = newINT
                 return [concPath], des

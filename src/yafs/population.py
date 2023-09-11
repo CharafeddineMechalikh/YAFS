@@ -29,8 +29,7 @@ class Population(object):
         self.logger = logger or logging.getLogger(__name__)
         self.name = name
         self.activation_dist = activation_dist
-
-        # self.id_process = -1
+ 
         self.src_control = []
         self.sink_control = []
 
